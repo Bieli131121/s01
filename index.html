@@ -3,23 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulado 01 – Técnico Legislativo</title>
+<title>Simulado 02 – Técnico Legislativo</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
   .container { max-width: 780px; margin: 0 auto; padding: 2rem 1rem 4rem; }
 
-  /* Header */
-  .header { background: #fff; border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; border: 1px solid #e8e8e4; }
-  .header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-  .header p { font-size: 14px; color: #666; }
+  /* ── TELA DE START ── */
+  #start-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 80vh; text-align: center; gap: 1.5rem;
+  }
+  .start-card {
+    background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
+    border: 1px solid #e8e8e4; max-width: 480px; width: 100%;
+  }
+  .start-card h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+  .start-card .sub { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+  .start-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .start-info-item { background: #f5f5f0; border-radius: 10px; padding: 12px; text-align: center; }
+  .start-info-item strong { display: block; font-size: 22px; font-weight: 700; color: #3a7bd5; }
+  .start-info-item span { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+  .start-rules { text-align: left; font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 1.5rem;
+    background: #fffbf0; border: 1px solid #e8d88a; border-radius: 10px; padding: 12px 16px; }
+  .start-rules li { margin-left: 1.2rem; }
+  .btn-start {
+    width: 100%; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 700;
+    background: #3a7bd5; color: #fff; border: none; cursor: pointer;
+    transition: background 0.15s; font-family: inherit; letter-spacing: 0.02em;
+  }
+  .btn-start:hover { background: #2e6bc0; }
+
+  /* ── CRONÔMETRO ── */
+  #prova-screen { display: none; }
+  .cronometro-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff; border-bottom: 1px solid #e8e8e4;
+    padding: 10px 1rem; margin: 0 -1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .crono-left { display: flex; align-items: center; gap: 10px; }
+  .crono-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+  .crono-time {
+    font-size: 26px; font-weight: 700; color: #1a1a1a; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em; transition: color 0.3s;
+  }
+  .crono-time.warning { color: #d4700a; }
+  .crono-time.danger  { color: #b03030; }
+  .crono-time.done    { color: #888; }
+  .crono-progress { flex: 1; height: 5px; background: #e8e8e4; border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .crono-fill { height: 100%; background: #3a7bd5; border-radius: 3px; transition: width 1s linear, background 0.3s; width: 100%; }
+  .crono-fill.warning { background: #d4700a; }
+  .crono-fill.danger  { background: #b03030; }
+  .btn-pausar {
+    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: 1px solid #d0d0cc; background: #fff; color: #1a1a1a;
+    cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-pausar:hover { background: #f0f0ec; }
+  .btn-pausar.pausado { background: #3a7bd5; color: #fff; border-color: #3a7bd5; }
+
+  /* ── HEADER ── */
+  .header { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e8e8e4; }
+  .header h1 { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+  .header p { font-size: 13px; color: #666; }
 
   /* Stats */
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
   .stat { background: #fff; border-radius: 10px; padding: 12px 14px; text-align: center; border: 1px solid #e8e8e4; }
   .stat-val { font-size: 26px; font-weight: 600; color: #1a1a1a; line-height: 1; }
   .stat-val.green { color: #1a7a4a; }
-  .stat-val.red { color: #b03030; }
+  .stat-val.red   { color: #b03030; }
   .stat-lbl { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
 
   /* Progress */
@@ -40,30 +94,37 @@
   .questao-num { font-size: 12px; font-weight: 600; color: #3a7bd5; background: #eef3fc; padding: 3px 10px; border-radius: 20px; }
   .questao-secao { font-size: 11px; color: #888; }
   .questao-enunciado { font-size: 14px; color: #1a1a1a; line-height: 1.6; margin-bottom: 14px; font-weight: 500; }
+  .texto-base { font-size: 13px; color: #444; background: #f8f8f5; border-left: 3px solid #3a7bd5;
+    padding: 10px 14px; border-radius: 0 8px 8px 0; margin-bottom: 12px; line-height: 1.6; font-style: italic; }
   .opcoes { display: flex; flex-direction: column; gap: 7px; }
-  .opcao { display: flex; align-items: flex-start; gap: 10px; padding: 9px 13px; border-radius: 8px; border: 1px solid #e0e0dc; cursor: pointer; font-size: 13px; color: #1a1a1a; background: #fff; text-align: left; transition: all 0.15s; font-family: inherit; width: 100%; }
+  .opcao { display: flex; align-items: flex-start; gap: 10px; padding: 9px 13px; border-radius: 8px;
+    border: 1px solid #e0e0dc; cursor: pointer; font-size: 13px; color: #1a1a1a; background: #fff;
+    text-align: left; transition: all 0.15s; font-family: inherit; width: 100%; }
   .opcao:hover:not(:disabled) { background: #f5f5f0; border-color: #bbb; }
   .opcao:disabled { cursor: default; }
   .opcao .letra { font-weight: 700; min-width: 20px; color: #666; font-size: 13px; }
   .opcao.correta { background: #eaf6ef; border-color: #4caf82; }
   .opcao.correta .letra { color: #1a7a4a; }
-  .opcao.errada { background: #fdf0f0; border-color: #e07070; }
-  .opcao.errada .letra { color: #b03030; }
+  .opcao.errada  { background: #fdf0f0; border-color: #e07070; }
+  .opcao.errada  .letra { color: #b03030; }
   .opcao.gabarito { background: #eaf6ef; border-color: #4caf82; }
   .opcao.gabarito .letra { color: #1a7a4a; }
   .feedback { font-size: 12px; margin-top: 10px; padding: 7px 12px; border-radius: 8px; font-weight: 500; }
-  .feedback.ok { background: #eaf6ef; color: #1a7a4a; }
+  .feedback.ok  { background: #eaf6ef; color: #1a7a4a; }
   .feedback.nok { background: #fdf0f0; color: #b03030; }
 
   /* Botões */
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2rem; }
-  .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid #d0d0cc; background: #fff; color: #1a1a1a; font-family: inherit; font-weight: 500; transition: all 0.15s; }
+  .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; cursor: pointer;
+    border: 1px solid #d0d0cc; background: #fff; color: #1a1a1a;
+    font-family: inherit; font-weight: 500; transition: all 0.15s; }
   .btn:hover { background: #f0f0ec; }
   .btn.primary { background: #3a7bd5; color: #fff; border-color: #3a7bd5; }
   .btn.primary:hover { background: #2e6bc0; }
 
-  /* Resultado final */
-  .resultado { background: #fff; border-radius: 12px; padding: 1.5rem 2rem; border: 1px solid #e8e8e4; margin-bottom: 1.5rem; display: none; text-align: center; }
+  /* Resultado */
+  .resultado { background: #fff; border-radius: 12px; padding: 1.5rem 2rem;
+    border: 1px solid #e8e8e4; margin-bottom: 1.5rem; display: none; text-align: center; }
   .resultado.show { display: block; }
   .resultado h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
   .resultado p { color: #555; font-size: 14px; }
@@ -72,135 +133,713 @@
   .nota.reprovado { color: #b03030; }
   .meta { font-size: 13px; color: #888; }
 
+  /* ── DIAGNÓSTICO INTELIGENTE ── */
+  .diagnostico { display: none; margin-bottom: 1.5rem; }
+  .diagnostico.show { display: block; }
+  .diag-bloco {
+    background: #fff; border: 1px solid #e8e8e4; border-radius: 12px;
+    padding: 1.25rem 1.5rem; margin-bottom: 14px;
+  }
+  .diag-bloco h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #1a1a1a; }
+  .diag-sub { font-size: 12px; color: #888; margin-bottom: 12px; }
+  .diag-zero { font-size: 13px; color: #1a7a4a; font-weight: 600; }
+
+  .diag-criterios { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .crit-item { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 8px 12px;
+    border-radius: 8px; background: #f8f8f5; }
+  .crit-item.ok   { background: #eaf6ef; }
+  .crit-item.fail { background: #fdf0f0; }
+  .crit-icone { font-weight: 700; font-size: 15px; min-width: 18px; }
+  .crit-item.ok .crit-icone   { color: #1a7a4a; }
+  .crit-item.fail .crit-icone { color: #b03030; }
+
+  .chance-card { border: 2px solid #ccc; border-radius: 10px; padding: 14px 16px; margin-top: 8px; }
+  .chance-label { font-size: 15px; font-weight: 700; display: block; margin-bottom: 6px; }
+  .chance-card p { font-size: 13px; color: #444; line-height: 1.55; margin-bottom: 6px; }
+  .diag-disclaimer { font-size: 11px; color: #999; font-style: italic; margin-top: 6px; }
+
+  .prioridade-lista { display: flex; flex-direction: column; gap: 8px; }
+  .prioridade-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: 10px; background: #fff8ee; border: 1px solid #f0dca0; }
+  .prioridade-rank { font-size: 16px; font-weight: 800; color: #b06020; min-width: 28px; text-align: center; }
+  .prioridade-info { flex: 1; }
+  .prioridade-nome { font-size: 13px; font-weight: 700; }
+  .prioridade-bloco { font-size: 10px; font-weight: 500; color: #999; margin-left: 6px;
+    border: 1px solid #ddd; border-radius: 10px; padding: 1px 7px; }
+  .prioridade-detalhe { font-size: 11px; color: #777; margin-top: 2px; }
+  .prioridade-pontos { font-size: 14px; font-weight: 800; color: #b03030; white-space: nowrap; }
+
+  .materia-tabela { display: flex; flex-direction: column; gap: 9px; }
+  .materia-linha { display: grid; grid-template-columns: 150px 1fr 50px; align-items: center; gap: 10px; }
+  .materia-nome { font-size: 12px; font-weight: 600; }
+  .materia-barra-wrap { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+  .materia-barra { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .materia-num { font-size: 12px; color: #666; text-align: right; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 500px) {
+    .materia-linha { grid-template-columns: 110px 1fr 42px; }
+    .materia-nome { font-size: 11px; }
+  }
+
+  /* Overlay de pausa */
+  #pause-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  #pause-overlay.show { display: flex; }
+  .pause-card {
+    background: #fff; border-radius: 16px; padding: 2rem 2.5rem; text-align: center;
+    max-width: 320px; width: 90%;
+  }
+  .pause-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .pause-card p { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+
   @media (max-width: 500px) {
     .stats { grid-template-columns: repeat(2, 1fr); }
-    .header { padding: 1rem 1.25rem; }
+    .start-info { grid-template-columns: 1fr 1fr; }
     .questao { padding: 1rem; }
+    .crono-time { font-size: 20px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="header">
-    <h1>Simulado 01 – Técnico Legislativo</h1>
-    <p>Câmara Municipal de Palhoça &nbsp;·&nbsp; 50 questões &nbsp;·&nbsp; Meta: 40 acertos (80%)</p>
+  <!-- ══ TELA DE INÍCIO ══ -->
+  <div id="start-screen">
+    <div class="start-card">
+      <h1>Simulado 02</h1>
+      <p class="sub">Técnico Legislativo · Câmara Municipal de Palhoça/SC · FUNDATEC</p>
+
+      <div class="start-info">
+        <div class="start-info-item"><strong>70</strong><span>Questões</span></div>
+        <div class="start-info-item"><strong>4h</strong><span>Duração</span></div>
+        <div class="start-info-item"><strong>12</strong><span>Mín. Bloco I</span></div>
+        <div class="start-info-item"><strong>20</strong><span>Mín. Bloco II</span></div>
+      </div>
+
+      <ul class="start-rules">
+        <li>Use caneta esferográfica azul ou preta na prova real.</li>
+        <li>Bloco I (30 q.) — mínimo 12 acertos para não ser eliminado.</li>
+        <li>Bloco II (40 q.) — mínimo 20 acertos para não ser eliminado.</li>
+        <li>O cronômetro inicia ao clicar em Iniciar e pode ser pausado.</li>
+        <li>Ao término do tempo, o gabarito é revelado automaticamente.</li>
+      </ul>
+
+      <button class="btn-start" onclick="iniciarProva()">▶ Iniciar Simulado</button>
+    </div>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="stat-val" id="s-resp">0</div><div class="stat-lbl">Respondidas</div></div>
-    <div class="stat"><div class="stat-val green" id="s-cert">0</div><div class="stat-lbl">Certas</div></div>
-    <div class="stat"><div class="stat-val red" id="s-err">0</div><div class="stat-lbl">Erradas</div></div>
-    <div class="stat"><div class="stat-val" id="s-pct">—</div><div class="stat-lbl">Aproveitamento</div></div>
+  <!-- ══ TELA DA PROVA ══ -->
+  <div id="prova-screen">
+
+    <!-- Cronômetro fixo no topo -->
+    <div class="cronometro-bar">
+      <div class="crono-left">
+        <span class="crono-label">Tempo</span>
+        <span class="crono-time" id="crono-display">4:00:00</span>
+      </div>
+      <div class="crono-progress">
+        <div class="crono-fill" id="crono-fill"></div>
+      </div>
+      <button class="btn-pausar" id="btn-pausar" onclick="togglePausa()">⏸ Pausar</button>
+    </div>
+
+    <div class="header">
+      <h1>Simulado 02 – Técnico Legislativo</h1>
+      <p>Câmara Municipal de Palhoça · 70 questões · Bloco I: mín. 12 · Bloco II: mín. 20</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="s-resp">0</div><div class="stat-lbl">Respondidas</div></div>
+      <div class="stat"><div class="stat-val green" id="s-cert">0</div><div class="stat-lbl">Certas</div></div>
+      <div class="stat"><div class="stat-val red" id="s-err">0</div><div class="stat-lbl">Erradas</div></div>
+      <div class="stat"><div class="stat-val" id="s-pct">—</div><div class="stat-lbl">Aproveitamento</div></div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+      <div class="progress-label" id="prog-label">0 de 70 respondidas</div>
+    </div>
+
+    <div id="resultado" class="resultado">
+      <p>Resultado final</p>
+      <div class="nota" id="res-nota"></div>
+      <h2 id="res-titulo"></h2>
+      <p id="res-desc"></p>
+      <p class="meta" style="margin-top:8px;" id="res-meta"></p>
+    </div>
+
+    <div id="diagnostico" class="diagnostico"></div>
+
+    <div class="tabs" id="tabs"></div>
+    <div id="questoes"></div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="reiniciar()">↺ Reiniciar simulado</button>
+      <button class="btn" onclick="renderDiagnostico()">📊 Ver diagnóstico inteligente</button>
+      <button class="btn" onclick="revelarGabarito()">Ver gabarito completo</button>
+    </div>
+
+  </div><!-- /prova-screen -->
+
+</div><!-- /container -->
+
+<!-- Overlay de pausa -->
+<div id="pause-overlay">
+  <div class="pause-card">
+    <h2>⏸ Simulado pausado</h2>
+    <p>O cronômetro está parado. Clique em continuar quando estiver pronto.</p>
+    <button class="btn-start" onclick="togglePausa()">▶ Continuar</button>
   </div>
-
-  <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
-    <div class="progress-label" id="prog-label">0 de 50 respondidas</div>
-  </div>
-
-  <div id="resultado" class="resultado">
-    <p>Resultado final</p>
-    <div class="nota" id="res-nota"></div>
-    <h2 id="res-titulo"></h2>
-    <p id="res-desc"></p>
-    <p class="meta" style="margin-top:8px;">Meta: 40/50 (80%) para aprovação confortável</p>
-  </div>
-
-  <div class="tabs" id="tabs"></div>
-  <div id="questoes"></div>
-
-  <div class="btn-row">
-    <button class="btn primary" onclick="reiniciar()">↺ Reiniciar simulado</button>
-    <button class="btn" onclick="revelarGabarito()">Ver gabarito completo</button>
-  </div>
-
 </div>
 
 <script>
+/* ══════════════════════════════════════════════
+   DADOS DAS QUESTÕES
+══════════════════════════════════════════════ */
 const secoes = [
-  { nome: "Língua Portuguesa", cor: "#3a7bd5" },
-  { nome: "Legislação", cor: "#7b5ea7" },
-  { nome: "Conhecimentos Gerais", cor: "#2a9d6f" },
-  { nome: "Informática", cor: "#d4700a" },
-  { nome: "Conhecimentos Específicos", cor: "#c0394b" }
+  { nome: "Língua Portuguesa",         cor: "#3a7bd5", bloco: "I"  },
+  { nome: "Matemática / R. Lógico",    cor: "#d4700a", bloco: "I"  },
+  { nome: "Informática",               cor: "#7b5ea7", bloco: "I"  },
+  { nome: "Legislação (Geral)",        cor: "#2a9d6f", bloco: "I"  },
+  { nome: "Atualidades",               cor: "#b06020", bloco: "I"  },
+  { nome: "Dir. Constitucional",       cor: "#c0394b", bloco: "II" },
+  { nome: "Dir. Administrativo",       cor: "#1a7a4a", bloco: "II" },
+  { nome: "Administração Pública",     cor: "#3a7bd5", bloco: "II" },
+  { nome: "Orçamento e Contabilidade", cor: "#7b5ea7", bloco: "II" },
+  { nome: "Licitações (Lei 14.133)",   cor: "#d4700a", bloco: "II" },
+  { nome: "Gestão de Materiais",       cor: "#2a9d6f", bloco: "II" },
+  { nome: "Gestão de Pessoas",         cor: "#b06020", bloco: "II" },
+  { nome: "Rotinas Administrativas",   cor: "#c0394b", bloco: "II" },
+  { nome: "Comunicação Administrativa",cor: "#1a7a4a", bloco: "II" },
+  { nome: "Ouvidoria Pública",         cor: "#3a7bd5", bloco: "II" }
 ];
 
 const questoes = [
-  { n:1,  s:0, e:"Assinale a alternativa em que todas as palavras estão grafadas corretamente:", o:["Exceção – privilégio – análise","Excessão – privilégio – análise","Exceção – previlégio – análise","Exceção – privilégio – análize"] },
-  { n:2,  s:0, e:"A concordância verbal está correta em:", o:["Fazem dois anos que não o vejo.","Houveram muitos candidatos.","Existem vagas disponíveis.","Deve haverem problemas."] },
-  { n:3,  s:0, e:"Assinale a frase com uso correto da crase:", o:["Vou à Câmara Municipal.","Vou à Palhoça.","Entreguei à ele o documento.","Refiro-me à pessoas experientes."] },
-  { n:4,  s:0, e:'Em "Os vereadores aprovaram o projeto", o sujeito é:', o:["Projeto","Aprovaram","Vereadores","Os vereadores"] },
-  { n:5,  s:0, e:'O plural de "cidadão" é:', o:["Cidadões","Cidadãos","Cidadoes","Cidadães"] },
-  { n:6,  s:0, e:"Assinale a alternativa com linguagem formal:", o:["A gente vai resolver isso.","Nós vamos resolver isso.","Vamos resolver isso aí.","A galera resolverá isso."] },
-  { n:7,  s:0, e:'O antônimo de "eficiente" é:', o:["Capaz","Competente","Ineficiente","Produtivo"] },
-  { n:8,  s:0, e:'Em "Embora estivesse cansado, continuou trabalhando", a oração expressa:', o:["Causa","Consequência","Concessão","Finalidade"] },
-  { n:9,  s:0, e:'A palavra "legislativo" é classificada como:', o:["Verbo","Adjetivo","Advérbio","Pronome"] },
-  { n:10, s:0, e:"Assinale a frase pontuada corretamente:", o:["Os servidores, compareceram cedo.","Os servidores compareceram, cedo.","Os servidores compareceram cedo.","Os, servidores compareceram cedo."] },
-  { n:11, s:1, e:"O princípio da legalidade determina que:", o:["O agente público pode fazer tudo o que a lei não proíbe.","O agente público só pode agir conforme a lei.","A lei não se aplica à administração.","O gestor decide livremente."] },
-  { n:12, s:1, e:"São princípios da Administração Pública:", o:["Legalidade, impessoalidade, moralidade.","Legalidade, amizade, publicidade.","Moralidade, favoritismo, eficiência.","Publicidade, privilégio, eficiência."] },
-  { n:13, s:1, e:"O Poder Legislativo municipal é exercido:", o:["Pelo Prefeito.","Pela Câmara Municipal.","Pelo Tribunal de Justiça.","Pelo Ministério Público."] },
-  { n:14, s:1, e:"O vereador exerce função:", o:["Jurisdicional.","Executiva.","Legislativa e fiscalizadora.","Militar."] },
-  { n:15, s:1, e:"O orçamento municipal é aprovado:", o:["Pela Câmara Municipal.","Pelo Governador.","Pelo Tribunal de Contas.","Pelo Ministério Público."] },
-  { n:16, s:1, e:"A Constituição Federal foi promulgada em:", o:["1985","1986","1988","1990"] },
-  { n:17, s:1, e:"O concurso público atende ao princípio da:", o:["Impessoalidade.","Amizade.","Subjetividade.","Discricionariedade."] },
-  { n:18, s:1, e:"O servidor público deve agir com:", o:["Favorecimento.","Moralidade.","Parcialidade.","Interesse próprio."] },
-  { n:19, s:1, e:"A publicidade dos atos administrativos busca:", o:["Sigilo.","Transparência.","Benefício pessoal.","Restrição de acesso."] },
-  { n:20, s:1, e:"A Câmara Municipal pertence ao Poder:", o:["Executivo.","Judiciário.","Legislativo.","Moderador."] },
-  { n:21, s:2, e:"Qual é a capital de Santa Catarina?", o:["Joinville","Blumenau","Florianópolis","Criciúma"] },
-  { n:22, s:2, e:"O Brasil está localizado no continente:", o:["Europeu","Asiático","Sul-Americano","Africano"] },
-  { n:23, s:2, e:"A moeda oficial do Brasil é:", o:["Peso","Real","Dólar","Euro"] },
-  { n:24, s:2, e:"A ONU significa:", o:["Organização Nacional Unificada","Organização das Nações Unidas","Organização Nova Universal","Ordem Nacional Unificada"] },
-  { n:25, s:2, e:"O município de Palhoça pertence à região:", o:["Oeste Catarinense","Grande Florianópolis","Serra Catarinense","Vale do Itajaí"] },
-  { n:26, s:3, e:"O Microsoft Word é um:", o:["Navegador","Sistema Operacional","Editor de Texto","Banco de Dados"] },
-  { n:27, s:3, e:"O atalho CTRL+C serve para:", o:["Colar","Copiar","Recortar","Salvar"] },
-  { n:28, s:3, e:"O Excel é utilizado principalmente para:", o:["Planilhas eletrônicas","Navegação na internet","Edição de vídeos","Programação"] },
-  { n:29, s:3, e:"Um antivírus tem a função de:", o:["Aumentar a internet","Criar planilhas","Proteger contra malwares","Compactar arquivos"] },
-  { n:30, s:3, e:"O e-mail é utilizado para:", o:["Telefonar","Enviar mensagens eletrônicas","Editar imagens","Criar bancos de dados"] },
-  { n:31, s:4, e:"O protocolo administrativo tem como finalidade:", o:["Controlar e registrar documentos.","Julgar processos.","Elaborar leis.","Executar obras."] },
-  { n:32, s:4, e:"Documento recebido por órgão público deve:", o:["Ser descartado.","Ser protocolado.","Ser destruído.","Ser arquivado sem registro."] },
-  { n:33, s:4, e:"Arquivo permanente contém documentos:", o:["Sem valor.","De guarda temporária.","De valor histórico e administrativo.","Duplicados."] },
-  { n:34, s:4, e:"Atendimento ao público exige:", o:["Descaso.","Cordialidade.","Favoritismo.","Parcialidade."] },
-  { n:35, s:4, e:"Redação oficial deve prezar por:", o:["Clareza.","Gírias.","Ambiguidade.","Informalidade."] },
-  { n:36, s:4, e:"O memorando é utilizado para:", o:["Comunicação interna.","Comunicação internacional.","Sentença judicial.","Decreto."] },
-  { n:37, s:4, e:"O ofício é:", o:["Comunicação oficial.","Documento contábil.","Processo judicial.","Contrato."] },
-  { n:38, s:4, e:"O arquivamento correto facilita:", o:["A perda de documentos.","O acesso às informações.","O descarte indevido.","A duplicação de arquivos."] },
-  { n:39, s:4, e:"A ética no serviço público envolve:", o:["Honestidade.","Favorecimento.","Nepotismo.","Vantagem pessoal."] },
-  { n:40, s:4, e:"A Lei de Acesso à Informação visa:", o:["Sigilo absoluto.","Transparência.","Restrição documental.","Controle privado."] },
-  { n:41, s:4, e:"A gestão documental busca:", o:["Organizar informações.","Destruir arquivos.","Ocultar dados.","Reduzir transparência."] },
-  { n:42, s:4, e:"Processo administrativo é:", o:["Conjunto de atos para decisão administrativa.","Lei municipal.","Contrato.","Licitação."] },
-  { n:43, s:4, e:"A comunicação oficial deve ser:", o:["Clara e objetiva.","Complexa e rebuscada.","Ambígua.","Informal."] },
-  { n:44, s:4, e:"O servidor deve tratar o cidadão com:", o:["Respeito.","Desprezo.","Superioridade.","Hostilidade."] },
-  { n:45, s:4, e:"A digitalização de documentos tem por objetivo:", o:["Facilitar armazenamento e consulta.","Eliminar todos os originais.","Impedir acesso.","Ocultar informações."] },
-  { n:46, s:4, e:"O controle de documentos permite:", o:["Rastreabilidade.","Desorganização.","Extravio.","Duplicidade."] },
-  { n:47, s:4, e:"O patrimônio público pertence:", o:["Aos servidores.","Ao prefeito.","À coletividade.","Aos vereadores."] },
-  { n:48, s:4, e:"O sigilo documental somente pode ocorrer:", o:["Quando previsto em lei.","Sempre.","Nunca.","Por vontade do servidor."] },
-  { n:49, s:4, e:"Transparência pública fortalece:", o:["Controle social.","Corrupção.","Sigilo.","Favorecimento."] },
-  { n:50, s:4, e:"O objetivo do serviço público é:", o:["Interesse particular.","Interesse coletivo.","Lucro.","Benefício político."] }
+  // BLOCO I – LÍNGUA PORTUGUESA (1–10)
+  {n:1,  s:0, tb:"A Câmara Municipal exerce papel fundamental na vida democrática de um município. Além de elaborar leis, fiscaliza os atos do Poder Executivo, aprova o orçamento público e representa os interesses da população nas decisões que afetam o cotidiano da cidade. Para que esse trabalho seja eficiente, é necessário que os servidores legislativos atuem com organização, ética e compromisso com o interesse coletivo, garantindo transparência e agilidade nos processos administrativos.",
+   e:"Segundo o texto, é correto afirmar que:",
+   o:["A Câmara Municipal só tem a função de elaborar leis.",
+      "A fiscalização dos atos do Executivo é uma atribuição do Poder Judiciário.",
+      "A Câmara Municipal acumula funções legislativas, fiscalizadoras e orçamentárias.",
+      "O orçamento público é aprovado exclusivamente pelo Prefeito.",
+      "A transparência é incompatível com a agilidade dos processos administrativos."], g:2},
+
+  {n:2,  s:0, e:'No texto (Q1), a palavra "compromisso" pode ser substituída, sem alteração de sentido, por:',
+   o:["Indiferença","Empenho","Dúvida","Recusa","Distração"], g:1},
+
+  {n:3,  s:0, e:'No trecho "Para que esse trabalho seja eficiente...", o termo destacado retoma:',
+   o:["A vida democrática do município",
+      "A elaboração de leis, a fiscalização, a aprovação do orçamento e a representação da população",
+      "O interesse coletivo","A transparência","Os servidores legislativos"], g:1},
+
+  {n:4,  s:0, e:"Assinale a alternativa em que todas as palavras estão corretamente acentuadas, de acordo com o Acordo Ortográfico vigente:",
+   o:["Júri, ítem, fôrum","Júri, item, fórum","Juri, item, forum","Júri, item, fôrum","Juri, ítem, fórum"], g:1},
+
+  {n:5,  s:0, e:'Na frase "O processo, que estava parado há meses, foi finalmente julgado.", a palavra destacada classifica-se morfologicamente como:',
+   o:["Conjunção subordinativa integrante","Pronome relativo","Advérbio","Pronome demonstrativo","Conjunção coordenativa explicativa"], g:1},
+
+  {n:6,  s:0, e:'Assinale a alternativa que preenche corretamente as lacunas: "O servidor compareceu ___ Coordenação Local ___ fim de esclarecer ___ respeito do laudo."',
+   o:["à – a – à","a – à – à","à – à – a","a – a – à","à – a – a"], g:0},
+
+  {n:7,  s:0, e:"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão:",
+   o:["Fazem dois anos que o concurso foi homologado.",
+      "Mais de um candidato recorreu do gabarito preliminar.",
+      "A maioria dos servidores compareceram à reunião.",
+      "Devem haver vagas suficientes no cadastro de reserva.",
+      "Existe muitos candidatos inscritos para o cargo."], g:1},
+
+  {n:8,  s:0, e:"Assinale a alternativa em que a pontuação está corretamente empregada:",
+   o:["Os candidatos, que chegaram atrasados não puderam fazer a prova.",
+      "Os candidatos que chegaram atrasados, não puderam fazer a prova.",
+      "Os candidatos que chegaram atrasados não puderam fazer a prova.",
+      "Os candidatos, que chegaram, atrasados não puderam fazer a prova.",
+      "Os candidatos que, chegaram atrasados, não puderam fazer a prova."], g:2},
+
+  {n:9,  s:0, e:'"A Câmara Municipal é a casa do povo." Nessa frase, identifica-se a seguinte figura de linguagem:',
+   o:["Hipérbole","Eufemismo","Metáfora","Ironia","Antítese"], g:2},
+
+  {n:10, s:0, e:'Em "Embora o prazo tenha se esgotado, o recurso foi protocolado.", a conjunção destacada estabelece relação de:',
+   o:["Causa","Concessão","Condição","Consequência","Finalidade"], g:1},
+
+  // BLOCO I – MATEMÁTICA / RACIOCÍNIO LÓGICO (11–15)
+  {n:11, s:1, e:"Um candidato acertou 28 das 40 questões de Conhecimentos Específicos de uma prova. O percentual de acerto foi de:",
+   o:["60%","65%","70%","75%","80%"], g:2},
+
+  {n:12, s:1, e:"Se 5 servidores conseguem digitalizar 200 processos em 4 dias, trabalhando no mesmo ritmo, quantos dias 8 servidores levariam para digitalizar 320 processos?",
+   o:["2,5","3,2","4","4,5","5"], g:2},
+
+  {n:13, s:1, e:"O triplo de um número, somado a 12, é igual a 51. Esse número é:",
+   o:["11","13","13","17","19"], g:1},
+
+  {n:14, s:1, e:'Considere a proposição: "Se o candidato é aprovado, então ele é convocado." A negação lógica dessa proposição é:',
+   o:["Se o candidato não é aprovado, então ele não é convocado.",
+      "O candidato é aprovado e não é convocado.",
+      "O candidato não é aprovado ou não é convocado.",
+      "Se o candidato é convocado, então ele é aprovado.",
+      "O candidato não é aprovado e não é convocado."], g:1},
+
+  {n:15, s:1, e:"Em uma sequência de provas, as notas de cinco candidatos formam uma PA: 62, 68, 74, 80 e 86. A razão dessa progressão e a média aritmética das cinco notas são, respectivamente:",
+   o:["5 e 72","6 e 74","6 e 76","8 e 74","6 e 72"], g:1},
+
+  // BLOCO I – INFORMÁTICA (16–20)
+  {n:16, s:2, e:"No Windows 10/11, a combinação de teclas utilizada para alternar rapidamente entre janelas abertas é:",
+   o:["Ctrl + Esc","Alt + Tab","Ctrl + Alt + Del","Windows + L","Ctrl + Shift + Esc"], g:1},
+
+  {n:17, s:2, e:"No Microsoft Word (Office 365), o recurso que permite gerar automaticamente um índice a partir dos títulos formatados com estilos é denominado:",
+   o:["Mala direta","Sumário automático","Quebra de seção","Marcador de lista","Controle de alterações"], g:1},
+
+  {n:18, s:2, e:"No Microsoft Excel, a fórmula =MÉDIA(B2:B10) tem como finalidade:",
+   o:["Somar os valores do intervalo B2 até B10",
+      "Contar quantas células do intervalo possuem valores",
+      "Calcular a média aritmética dos valores do intervalo B2 até B10",
+      "Identificar o maior valor do intervalo B2 até B10",
+      "Multiplicar os valores do intervalo B2 até B10"], g:2},
+
+  {n:19, s:2, e:'"Phishing" é uma prática de fraude eletrônica que consiste em:',
+   o:["Criptografar arquivos do usuário e exigir pagamento para liberá-los",
+      "Sobrecarregar um servidor com requisições até deixá-lo indisponível",
+      "Enviar mensagens fraudulentas que simulam fontes confiáveis para obter dados sigilosos da vítima",
+      "Monitorar o tráfego de uma rede sem fio sem autorização",
+      "Replicar-se automaticamente entre computadores de uma rede local"], g:2},
+
+  {n:20, s:2, e:"Sobre a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), é correto afirmar que ela:",
+   o:["Aplica-se exclusivamente a empresas privadas, não alcançando órgãos públicos",
+      "Estabelece princípios e regras para o tratamento de dados pessoais por pessoas físicas e jurídicas, de direito público ou privado",
+      "Proíbe qualquer tipo de tratamento de dados pessoais no Brasil",
+      "Substitui integralmente a Lei de Acesso à Informação",
+      "Aplica-se apenas a dados tratados em meio físico (papel)"], g:1},
+
+  // BLOCO I – LEGISLAÇÃO GERAL (21–26)
+  {n:21, s:3, e:"O crime praticado pelo funcionário público que se apropria de dinheiro, valor ou qualquer outro bem móvel, público ou particular, de que tem a posse em razão do cargo, ou o desvia em proveito próprio ou de outrem, é denominado, no Código Penal:",
+   o:["Concussão","Peculato","Prevaricação","Corrupção passiva","Advocacia administrativa"], g:1},
+
+  {n:22, s:3, e:"Sobre os crimes contra a Administração Pública, assinale a alternativa correta:",
+   o:["Corrupção passiva é solicitar ou receber vantagem indevida; corrupção ativa é oferecer ou prometer essa vantagem a funcionário público.",
+      "Concussão e corrupção passiva são exatamente o mesmo crime, apenas com nomes diferentes.",
+      "Prevaricação consiste em exigir vantagem indevida, para si ou para outrem, em razão da função.",
+      "Advocacia administrativa é crime exclusivo de advogados que atuam contra a Fazenda Pública.",
+      "Peculato só pode ser cometido por agente público que exerça cargo de chefia."], g:0},
+
+  {n:23, s:3, e:"De acordo com a Lei de Introdução às Normas do Direito Brasileiro (Decreto-Lei nº 4.657/1942), salvo disposição em contrário, a lei começa a vigorar:",
+   o:["Na data de sua publicação",
+      "30 dias depois de oficialmente publicada, no território nacional",
+      "45 dias depois de oficialmente publicada, no território nacional",
+      "Na data em que for sancionada",
+      "Imediatamente após sua aprovação pelo Poder Legislativo"], g:1},
+
+  {n:24, s:3, e:"Em regimes jurídicos estatutários, a forma originária de provimento de cargo público efetivo, condicionada à prévia aprovação em concurso público, denomina-se:",
+   o:["Promoção","Readaptação","Nomeação","Reversão","Recondução"], g:2},
+
+  {n:25, s:3, e:"As Leis Orgânicas Municipais, em geral, disciplinam, entre outros temas:",
+   o:["Apenas a estrutura do Poder Judiciário estadual",
+      "A organização político-administrativa do município, a composição e competências da Câmara e do Executivo municipal, observados os princípios da Constituição Federal e Estadual",
+      "Exclusivamente normas de trânsito municipal",
+      "Apenas o regime de servidores federais",
+      "Apenas a divisão territorial entre municípios vizinhos"], g:1},
+
+  {n:26, s:3, e:"Em regimentos internos de Câmaras Municipais, é comum que se disciplinem, entre outros pontos:",
+   o:["Apenas o uso do plenário para eventos culturais",
+      "O número de funcionários terceirizados da Câmara",
+      "A organização das sessões legislativas, o quórum para deliberações, o funcionamento das comissões e a tramitação de proposições",
+      "A política salarial do Poder Executivo",
+      "Exclusivamente o calendário de feriados municipais"], g:2},
+
+  // BLOCO I – ATUALIDADES (27–30)
+  {n:27, s:4, e:"Em 2026, a Copa do Mundo de Futebol está sendo realizada, de forma inédita, em três países simultaneamente. Esses países são:",
+   o:["Brasil, Argentina e Uruguai",
+      "Estados Unidos, México e Canadá",
+      "Alemanha, França e Espanha",
+      "Catar, Arábia Saudita e Emirados Árabes",
+      "Inglaterra, Escócia e País de Gales"], g:1},
+
+  {n:28, s:4, e:"A COP30, realizada em novembro de 2025, teve como sede uma cidade brasileira localizada na região amazônica. Essa cidade é:",
+   o:["Manaus","Belém","São Luís","Macapá","Rio Branco"], g:1},
+
+  {n:29, s:4, e:"O ano de 2026 é marcado, no Brasil, pelas eleições gerais, nas quais a população elege, entre outros cargos:",
+   o:["Apenas vereadores",
+      "Apenas prefeitos",
+      "Presidente da República, governadores, senadores, deputados federais e estaduais",
+      "Apenas o presidente da República",
+      "Apenas membros do Poder Judiciário"], g:2},
+
+  {n:30, s:4, e:"O crescente uso de Inteligência Artificial Generativa em órgãos públicos brasileiros tem motivado debates sobre:",
+   o:["A extinção total do uso de computadores na Administração Pública",
+      "A necessidade de equilibrar ganhos de eficiência com cuidados éticos, proteção de dados pessoais e verificação da qualidade das informações geradas",
+      "A proibição constitucional de qualquer uso de tecnologia pelo setor público",
+      "A substituição definitiva de todos os concursos públicos por sistemas automatizados",
+      "O fim da necessidade de legislação sobre proteção de dados"], g:1},
+
+  // BLOCO II – DIREITO CONSTITUCIONAL (31–37)
+  {n:31, s:5, e:"Constituem fundamentos da República Federativa do Brasil, conforme o art. 1º da Constituição Federal de 1988:",
+   o:["Apenas a soberania e a propriedade privada",
+      "A soberania, a cidadania, a dignidade da pessoa humana, os valores sociais do trabalho e da livre iniciativa e o pluralismo político",
+      "Apenas o pluralismo político",
+      "A centralização administrativa e a unidade federativa",
+      "Apenas a separação entre Igreja e Estado"], g:1},
+
+  {n:32, s:5, e:"São considerados direitos sociais previstos na Constituição Federal de 1988:",
+   o:["Apenas o direito de propriedade",
+      "Educação, saúde, trabalho, moradia, transporte, lazer, segurança, previdência social, entre outros",
+      "Apenas o direito ao voto",
+      "Apenas a liberdade de imprensa",
+      "Apenas o direito de reunião"], g:1},
+
+  {n:33, s:5, e:"A organização político-administrativa da República Federativa do Brasil compreende a União, os Estados, o Distrito Federal e os Municípios, sendo todos esses entes:",
+   o:["Subordinados hierarquicamente à União",
+      "Autônomos, nos termos da Constituição Federal",
+      "Dependentes financeiramente apenas dos Estados",
+      "Desprovidos de competência legislativa própria",
+      "Unidades meramente administrativas, sem autonomia política"], g:1},
+
+  {n:34, s:5, e:"Compete privativamente à Câmara Municipal, entre outras atribuições típicas do Poder Legislativo municipal:",
+   o:["Sancionar e promulgar leis exclusivamente",
+      "Elaborar e votar leis de iniciativa própria ou do Executivo, fiscalizar os atos do Poder Executivo e apreciar as contas do Município",
+      "Nomear diretamente os secretários municipais",
+      "Exercer a chefia do Poder Executivo nos períodos de recesso",
+      "Decretar o estado de calamidade pública sem qualquer formalidade"], g:1},
+
+  {n:35, s:5, e:"O processo legislativo, em regra, compreende as seguintes fases:",
+   o:["Apenas a votação",
+      "Iniciativa, discussão, votação (deliberação), sanção (ou veto) e promulgação",
+      "Apenas a sanção presidencial",
+      "Apenas a promulgação",
+      "Apenas a fase de emendas"], g:1},
+
+  {n:36, s:5, e:"São espécies normativas previstas no processo legislativo brasileiro:",
+   o:["Apenas leis ordinárias",
+      "Emendas à Constituição, leis complementares, leis ordinárias, leis delegadas, medidas provisórias, decretos legislativos e resoluções",
+      "Apenas decretos do Poder Executivo",
+      "Apenas portarias administrativas",
+      "Apenas resoluções do Poder Judiciário"], g:1},
+
+  {n:37, s:5, e:"A fiscalização contábil, financeira e orçamentária do Município será exercida pela Câmara Municipal, mediante controle externo, cabendo o auxílio técnico, no âmbito estadual, a:",
+   o:["Ministério Público Federal",
+      "Tribunal de Contas do Estado",
+      "Defensoria Pública Estadual",
+      "Tribunal de Justiça Estadual",
+      "Polícia Civil"], g:1},
+
+  // BLOCO II – DIREITO ADMINISTRATIVO (38–44)
+  {n:38, s:6, e:"São princípios expressos da Administração Pública previstos no art. 37, caput, da Constituição Federal:",
+   o:["Legalidade, impessoalidade, moralidade, publicidade e eficiência",
+      "Liberdade, igualdade e fraternidade",
+      "Centralização, hierarquia e disciplina",
+      "Lucratividade, competitividade e produtividade",
+      "Soberania, cidadania e dignidade"], g:0},
+
+  {n:39, s:6, e:"A Administração Pública Indireta é composta, entre outras entidades, por:",
+   o:["Ministérios e Secretarias",
+      "Autarquias, fundações públicas, empresas públicas e sociedades de economia mista",
+      "Apenas órgãos de assessoramento direto do chefe do Executivo",
+      "Apenas tribunais administrativos",
+      "Apenas comissões parlamentares de inquérito"], g:1},
+
+  {n:40, s:6, e:"Constituem atributos clássicos dos atos administrativos:",
+   o:["Onerosidade, comutatividade e bilateralidade",
+      "Presunção de legitimidade, imperatividade, autoexecutoriedade e tipicidade",
+      "Gratuidade obrigatória e revogabilidade absoluta",
+      "Irretratabilidade plena e perpetuidade",
+      "Confidencialidade obrigatória"], g:1},
+
+  {n:41, s:6, e:"A anulação de um ato administrativo ilegal:",
+   o:["Produz efeitos apenas para o futuro (ex nunc)",
+      "Em regra, retroage à data em que o ato foi praticado (ex tunc), por se tratar de vício de legalidade",
+      "Depende sempre de autorização do Poder Judiciário",
+      "Só pode ser feita pelo particular interessado",
+      "É vedada quando o ato beneficiar terceiros de boa-fé, em qualquer hipótese"], g:1},
+
+  {n:42, s:6, e:"O poder que permite à Administração apurar infrações e aplicar penalidades aos seus próprios servidores, bem como às pessoas sujeitas à disciplina administrativa, denomina-se:",
+   o:["Poder regulamentar","Poder hierárquico","Poder disciplinar","Poder de polícia","Poder normativo autônomo"], g:2},
+
+  {n:43, s:6, e:"Conforme a Lei nº 12.527/2011 (Lei de Acesso à Informação), é dever dos órgãos e entidades públicas:",
+   o:["Manter em sigilo absoluto todas as informações produzidas, salvo decisão judicial",
+      "Assegurar a gestão transparente da informação, propiciando amplo acesso e sua divulgação, ressalvadas as informações cujo sigilo seja imprescindível à segurança da sociedade e do Estado",
+      "Divulgar apenas informações solicitadas formalmente por advogados",
+      "Restringir o acesso à informação somente a servidores efetivos",
+      "Cobrar taxa obrigatória para qualquer pedido de informação"], g:1},
+
+  {n:44, s:6, e:"Pela Lei nº 8.429/1992 (com as alterações da Lei nº 14.230/2021), constituem atos de improbidade administrativa, entre outros, aqueles que importam em:",
+   o:["Enriquecimento ilícito, prejuízo ao erário ou atentado contra os princípios da administração pública, praticados com dolo",
+      "Qualquer erro material cometido de boa-fé por servidor público",
+      "Apenas condutas praticadas por agentes políticos eleitos",
+      "Apenas omissões do Poder Judiciário",
+      "Apenas atos praticados fora do exercício da função pública"], g:0},
+
+  // BLOCO II – ADMINISTRAÇÃO PÚBLICA (45–47)
+  {n:45, s:7, e:"No ciclo administrativo (PODC), a função que consiste em definir objetivos e os meios para alcançá-los, antes da execução das ações, é denominada:",
+   o:["Controle","Direção","Organização","Planejamento","Coordenação"], g:3},
+
+  {n:46, s:7, e:"A gestão por processos, aplicada ao setor público, tem como principal objetivo:",
+   o:["Aumentar a burocracia e o número de etapas dos processos",
+      "Reduzir a transparência das informações",
+      "Organizar e melhorar continuamente o fluxo de atividades, otimizando recursos e a entrega de valor ao cidadão",
+      "Eliminar qualquer forma de controle interno",
+      "Substituir integralmente os servidores públicos por sistemas automatizados"], g:2},
+
+  {n:47, s:7, e:"O governo eletrônico (e-gov), no contexto da Administração Pública, refere-se:",
+   o:["Exclusivamente à informatização da folha de pagamento",
+      "Ao uso de tecnologias da informação e comunicação para ampliar o acesso a serviços públicos, a transparência e a participação social",
+      "Apenas à substituição de e-mails por cartas",
+      "À proibição do uso de internet por órgãos públicos",
+      "Apenas à informatização de processos eleitorais"], g:1},
+
+  // BLOCO II – ORÇAMENTO E CONTABILIDADE (48–52)
+  {n:48, s:8, e:"São instrumentos de planejamento orçamentário previstos na Constituição Federal:",
+   o:["Apenas o orçamento de investimento das estatais",
+      "Plano Plurianual (PPA), Lei de Diretrizes Orçamentárias (LDO) e Lei Orçamentária Anual (LOA)",
+      "Apenas a Lei Orçamentária Anual",
+      "Apenas o balanço patrimonial",
+      "Apenas o relatório de gestão fiscal"], g:1},
+
+  {n:49, s:8, e:"Os estágios da despesa pública, conforme a Lei nº 4.320/1964, são, em regra:",
+   o:["Lançamento, arrecadação e recolhimento",
+      "Empenho, liquidação e pagamento",
+      "Previsão, fixação e arbitramento",
+      "Orçamento, execução e fiscalização",
+      "Planejamento, contratação e entrega"], g:1},
+
+  {n:50, s:8, e:"O ato emanado de autoridade competente que cria para o Estado obrigação de pagamento, sendo o primeiro estágio da despesa pública, denomina-se:",
+   o:["Liquidação","Pagamento","Empenho","Arrecadação","Estorno"], g:2},
+
+  {n:51, s:8, e:"A Lei Complementar nº 101/2000 (Lei de Responsabilidade Fiscal) estabelece, entre outras normas:",
+   o:["A dispensa de elaboração de orçamento pelos entes federativos",
+      "Normas de finanças públicas voltadas para a responsabilidade na gestão fiscal, incluindo limites de despesa com pessoal e metas fiscais",
+      "A proibição de qualquer endividamento público, em qualquer hipótese",
+      "A obrigatoriedade de superávit nominal em todos os exercícios financeiros",
+      "A vedação à publicação de relatórios fiscais"], g:1},
+
+  {n:52, s:8, e:"Em contabilidade pública, a Receita Orçamentária que ingressa nos cofres públicos por meio de tributos é classificada, quanto à origem, como receita:",
+   o:["Patrimonial","De capital","Tributária","Industrial","De serviços"], g:2},
+
+  // BLOCO II – LICITAÇÕES (53–56)
+  {n:53, s:9, e:"São princípios expressamente previstos na Lei nº 14.133/2021 para reger as licitações e contratos administrativos:",
+   o:["Apenas a celeridade",
+      "Legalidade, impessoalidade, moralidade, publicidade, eficiência, planejamento, transparência, competitividade, dentre outros",
+      "Apenas a economicidade",
+      "Apenas a confidencialidade",
+      "Apenas a discricionariedade"], g:1},
+
+  {n:54, s:9, e:"Constitui modalidade de licitação prevista na Lei nº 14.133/2021:",
+   o:["Convite","Tomada de preços","Pregão","Concurso de méritos esportivos","Carta-convite"], g:2},
+
+  {n:55, s:9, e:"A contratação direta, sem licitação, pode ocorrer, conforme a Lei nº 14.133/2021, nas hipóteses de:",
+   o:["Conveniência da autoridade contratante, sem necessidade de justificativa",
+      "Dispensa ou inexigibilidade de licitação, nos casos expressamente previstos em lei",
+      "Qualquer valor de contrato, a critério exclusivo do gestor",
+      "Apenas quando o fornecedor for parente do agente público",
+      "Apenas em contratos de valor superior a determinado teto, sem qualquer outro requisito"], g:1},
+
+  {n:56, s:9, e:"A fiscalização da execução dos contratos administrativos tem por finalidade, entre outras:",
+   o:["Permitir que o contratado defina unilateralmente o objeto do contrato",
+      "Verificar a conformidade da execução do objeto com as condições pactuadas, atestando o cumprimento das obrigações contratuais",
+      "Eliminar qualquer responsabilidade do contratado",
+      "Substituir a necessidade de instrumento contratual",
+      "Autorizar reajustes de preços sem qualquer critério"], g:1},
+
+  // BLOCO II – GESTÃO DE MATERIAIS (57–59)
+  {n:57, s:10, e:"O controle de estoques no almoxarifado público tem como principal finalidade:",
+   o:["Aumentar artificialmente o volume de compras",
+      "Garantir o suprimento adequado de materiais, evitando excessos e faltas, com registro de entradas e saídas",
+      "Eliminar qualquer registro documental de materiais",
+      "Permitir a venda de materiais públicos a particulares sem controle",
+      "Dispensar a conferência física dos materiais recebidos"], g:1},
+
+  {n:58, s:10, e:"O procedimento periódico de contagem física dos bens patrimoniais, com confronto entre a quantidade física existente e os registros contábeis/administrativos, denomina-se:",
+   o:["Tombamento","Inventário","Depreciação","Baixa patrimonial","Reavaliação"], g:1},
+
+  {n:59, s:10, e:"A baixa de um bem público do patrimônio de um órgão pode ocorrer, entre outras hipóteses, em razão de:",
+   o:["Simples solicitação verbal de qualquer servidor",
+      "Alienação, perecimento, obsolescência ou inservibilidade do bem, observado o devido processo administrativo",
+      "Mudança de cor do bem",
+      "Preferência pessoal do servidor responsável pelo setor",
+      "Ausência de qualquer formalidade, por se tratar de bem de pequeno valor"], g:1},
+
+  // BLOCO II – GESTÃO DE PESSOAS (60–62)
+  {n:60, s:11, e:"O regime estatutário, adotado por diversos entes públicos para seus servidores efetivos, caracteriza-se por:",
+   o:["Ser regido exclusivamente pela CLT",
+      "Ter natureza institucional/legal, disciplinada por estatuto próprio, e não por contrato de trabalho",
+      "Não admitir direitos e deveres para o servidor",
+      "Ser aplicável apenas a empregados de empresas públicas",
+      "Dispensar qualquer forma de investidura em cargo público"], g:1},
+
+  {n:61, s:11, e:"O período inicial após a posse em cargo público efetivo, durante o qual se avalia a aptidão e a capacidade do servidor para o exercício do cargo, denomina-se, em geral:",
+   o:["Disponibilidade","Estágio probatório","Readaptação","Licença premiada","Recondução"], g:1},
+
+  {n:62, s:11, e:"O controle de frequência e jornada de trabalho dos servidores públicos tem por objetivo, entre outros:",
+   o:["Restringir direitos fundamentais dos servidores",
+      "Subsidiar a gestão de pessoal, assegurando o cumprimento da carga horária e servindo de base para fins funcionais e remuneratórios",
+      "Substituir integralmente a avaliação de desempenho",
+      "Impedir o gozo de férias regulamentares",
+      "Eliminar qualquer necessidade de registro documental"], g:1},
+
+  // BLOCO II – ROTINAS ADMINISTRATIVAS (63–65)
+  {n:63, s:12, e:"Segundo o Manual de Redação da Presidência da República, a redação oficial deve, entre outras características, ser:",
+   o:["Informal, prolixa e ambígua",
+      "Impessoal, clara, concisa, formal e padronizada",
+      "Repleta de gírias e expressões regionais",
+      "Redigida exclusivamente em primeira pessoa do singular",
+      "Composta apenas de listas, sem qualquer texto corrido"], g:1},
+
+  {n:64, s:12, e:"A gestão documental, no âmbito de um órgão legislativo, compreende atividades como:",
+   o:["Apenas a destruição imediata de qualquer documento recebido",
+      "Protocolo, classificação, organização, tramitação e arquivamento de documentos físicos e digitais",
+      "Apenas a digitação de ofícios, sem qualquer controle de tramitação",
+      "Apenas a guarda de documentos em local não identificado",
+      "A eliminação de qualquer prazo de guarda documental"], g:1},
+
+  {n:65, s:12, e:'No processo legislativo municipal, denomina-se "proposição" o(s):',
+   o:["Apenas o ato de promulgação de uma lei já aprovada",
+      "Documento ou matéria sujeita à deliberação do Plenário, tal como projetos de lei, requerimentos, moções e indicações",
+      "Apenas o veto do Prefeito",
+      "Apenas a pauta de votação do dia",
+      "Apenas as atas de sessões já realizadas"], g:1},
+
+  // BLOCO II – COMUNICAÇÃO ADMINISTRATIVA (66–67)
+  {n:66, s:13, e:"No âmbito da comunicação administrativa, o expediente utilizado para comunicação interna entre setores ou autoridades do mesmo órgão, em geral mais simples que o ofício, é denominado:",
+   o:["Decreto","Memorando","Lei complementar","Edital","Súmula"], g:1},
+
+  {n:67, s:13, e:"O atendimento ao público, no setor legislativo, deve pautar-se, entre outros princípios, por:",
+   o:["Informalidade excessiva e ausência de registro das demandas",
+      "Cortesia, clareza, objetividade e respeito à pessoa atendida, com adequado registro e encaminhamento das solicitações",
+      "Priorização de demandas conforme o grau de amizade com o servidor",
+      "Recusa de atendimento sempre que a demanda for considerada complexa",
+      "Atendimento exclusivamente por meio de mensagens de voz"], g:1},
+
+  // BLOCO II – OUVIDORIA PÚBLICA (68–70)
+  {n:68, s:14, e:"A Lei nº 13.460/2017 dispõe sobre participação, proteção e defesa dos direitos do usuário dos serviços públicos, prevendo, entre outros instrumentos:",
+   o:["Apenas a possibilidade de reclamação verbal, sem qualquer registro",
+      "A criação de ouvidorias e a garantia de direitos básicos do usuário, como participação, obtenção de informações e manifestação sobre a prestação dos serviços",
+      "A extinção de qualquer canal de atendimento presencial",
+      "A vedação à criação de qualquer canal eletrônico de atendimento",
+      "A obrigatoriedade de pagamento de taxa para qualquer manifestação"], g:1},
+
+  {n:69, s:14, e:"São exemplos de manifestações que podem ser recebidas por uma ouvidoria pública:",
+   o:["Apenas elogios",
+      "Reclamações, denúncias, sugestões, elogios e solicitações",
+      "Apenas denúncias anônimas",
+      "Apenas pedidos de certidão de nascimento",
+      "Apenas recursos eleitorais"], g:1},
+
+  {n:70, s:14, e:"No tratamento das manifestações recebidas pela ouvidoria, deve-se observar, entre outros cuidados:",
+   o:["A divulgação irrestrita dos dados pessoais do manifestante, independentemente de sua vontade",
+      "O sigilo das informações pessoais do manifestante, quando solicitado, e a observância da Lei Geral de Proteção de Dados Pessoais",
+      "A obrigatoriedade de identificação completa em qualquer manifestação, sob pena de não recebimento",
+      "A divulgação pública do conteúdo de qualquer manifestação, antes mesmo de sua análise",
+      "A vedação a qualquer resposta ao manifestante"], g:1}
 ];
 
-// Gabarito: índice 0=A, 1=B, 2=C, 3=D
-// 1A 2C 3A 4D 5B 6B 7C 8C 9B 10C
-// 11B 12A 13B 14C 15A 16C 17A 18B 19B 20C
-// 21C 22C 23B 24B 25B
-// 26C 27B 28A 29C 30B
-// 31A 32B 33C 34B 35A 36A 37A 38B 39A 40B
-// 41A 42A 43A 44A 45A 46A 47C 48A 49A 50B
-const gabarito = [
-  0,2,0,3,1,1,2,2,1,2,  // 1-10
-  1,0,1,2,0,2,0,1,1,2,  // 11-20
-  2,2,1,1,1,             // 21-25
-  2,1,0,2,1,             // 26-30
-  0,1,2,1,0,0,0,1,0,1,  // 31-40
-  0,0,0,0,0,0,2,0,0,1   // 41-50
-];
-
-let respostas = new Array(50).fill(null);
+/* ══════════════════════════════════════════════
+   CRONÔMETRO
+══════════════════════════════════════════════ */
+const DURACAO = 4 * 60 * 60; // 4 horas em segundos
+let tempoRestante = DURACAO;
+let cronoInterval = null;
+let pausado = false;
+const TOTAL = questoes.length;
+let respostas = new Array(TOTAL).fill(null);
 let secaoAtiva = -1;
+let provaEncerrada = false;
 
+/* Marcador para questão deixada em branco (tempo esgotado / gabarito revelado
+   sem resposta do candidato) — NUNCA é igual a nenhum índice de alternativa (0–4),
+   então conta corretamente como erro, sem inflar artificialmente a nota. */
+const BRANCO = -1;
+
+/* ══════════════════════════════════════════════
+   CRITÉRIOS OFICIAIS DO EDITAL Nº 01/2026 (Anexo II – Nível Médio)
+   Técnico Legislativo – Câmara Municipal de Palhoça/SC
+══════════════════════════════════════════════ */
+const CRITERIOS = {
+  blocoI:  { nome: 'Bloco I – Conhecimentos Gerais',      total: 30, min: 12, peso: 1.20 },
+  blocoII: { nome: 'Bloco II – Conhecimentos Específicos', total: 40, min: 20, peso: 1.60 },
+  pontosMinTotal: 70,   // Nº mínimo de pontos do total (Anexo II)
+  pontosMaxTotal: 100,  // Nº de pontos do total (Anexo II)
+  vagasImediatas: 5     // 5 vagas + Cadastro Reserva (CR), conforme item 1.1 do Edital
+};
+
+function iniciarProva() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('prova-screen').style.display = 'block';
+  renderTabs();
+  renderQuestoes();
+  iniciarCronometro();
+}
+
+function iniciarCronometro() {
+  atualizarDisplayCrono();
+  cronoInterval = setInterval(() => {
+    if (pausado || provaEncerrada) return;
+    tempoRestante--;
+    atualizarDisplayCrono();
+    if (tempoRestante <= 0) encerrarTempo();
+  }, 1000);
+}
+
+function atualizarDisplayCrono() {
+  const h = Math.floor(tempoRestante / 3600);
+  const m = Math.floor((tempoRestante % 3600) / 60);
+  const s = tempoRestante % 60;
+  const str = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const el = document.getElementById('crono-display');
+  const fill = document.getElementById('crono-fill');
+  const pct = tempoRestante / DURACAO * 100;
+
+  el.textContent = str;
+  fill.style.width = pct + '%';
+
+  // Cores por urgência
+  el.className = 'crono-time';
+  fill.className = 'crono-fill';
+  if (provaEncerrada) {
+    el.classList.add('done');
+  } else if (tempoRestante <= 600) {       // últimos 10 min
+    el.classList.add('danger');
+    fill.classList.add('danger');
+  } else if (tempoRestante <= 1800) {      // últimos 30 min
+    el.classList.add('warning');
+    fill.classList.add('warning');
+  }
+}
+
+function togglePausa() {
+  if (provaEncerrada) return;
+  pausado = !pausado;
+  const btn = document.getElementById('btn-pausar');
+  const overlay = document.getElementById('pause-overlay');
+  if (pausado) {
+    btn.textContent = '▶ Continuar';
+    btn.classList.add('pausado');
+    overlay.classList.add('show');
+  } else {
+    btn.textContent = '⏸ Pausar';
+    btn.classList.remove('pausado');
+    overlay.classList.remove('show');
+  }
+}
+
+function encerrarTempo() {
+  provaEncerrada = true;
+  clearInterval(cronoInterval);
+  tempoRestante = 0;
+  atualizarDisplayCrono();
+  document.getElementById('btn-pausar').disabled = true;
+  document.getElementById('btn-pausar').textContent = '⏹ Encerrado';
+  alert('⏰ Tempo esgotado! O gabarito será revelado.');
+  // Questões em branco contam como erro (não como acerto automático)
+  questoes.forEach((q, qi) => { if (respostas[qi] === null) respostas[qi] = BRANCO; });
+  atualizarStats();
+  renderQuestoes();
+  mostrarResultado(calcStats().cert);
+}
+
+/* ══════════════════════════════════════════════
+   LÓGICA DO SIMULADO
+══════════════════════════════════════════════ */
 function calcStats() {
   const resp = respostas.filter(r => r !== null).length;
-  const cert = respostas.filter((r, i) => r !== null && r === gabarito[i]).length;
+  const cert = respostas.filter((r, i) => r !== null && r === questoes[i].g).length;
   return { resp, cert, err: resp - cert };
 }
 
@@ -210,37 +849,202 @@ function atualizarStats() {
   document.getElementById('s-cert').textContent = cert;
   document.getElementById('s-err').textContent = err;
   document.getElementById('s-pct').textContent = resp > 0 ? Math.round(cert / resp * 100) + '%' : '—';
-  document.getElementById('prog-fill').style.width = Math.round(resp / 50 * 100) + '%';
-  document.getElementById('prog-label').textContent = resp + ' de 50 respondidas';
+  document.getElementById('prog-fill').style.width = Math.round(resp / TOTAL * 100) + '%';
+  document.getElementById('prog-label').textContent = resp + ' de ' + TOTAL + ' respondidas';
+  if (resp === TOTAL && !provaEncerrada) mostrarResultado(cert);
+}
 
-  if (resp === 50) mostrarResultado(cert);
+/* ── Diagnóstico inteligente: aplica EXATAMENTE os critérios do Anexo II ── */
+function calcDiagnostico() {
+  const porSecao = secoes.map((s, idx) => {
+    const idxs = [];
+    questoes.forEach((q, i) => { if (q.s === idx) idxs.push(i); });
+    const total = idxs.length;
+    const respondidas = idxs.filter(i => respostas[i] !== null).length;
+    const acertos = idxs.filter(i => respostas[i] !== null && respostas[i] === questoes[i].g).length;
+    const erros = respondidas - acertos;
+    const peso = s.bloco === 'I' ? CRITERIOS.blocoI.peso : CRITERIOS.blocoII.peso;
+    const pontosPerdidos = +(erros * peso).toFixed(2);
+    const pct = total > 0 ? (acertos / total * 100) : 0;
+    return { idx, nome: s.nome, cor: s.cor, bloco: s.bloco, total, acertos, erros, respondidas, peso, pontosPerdidos, pct };
+  });
+
+  const blocoIData  = porSecao.filter(s => s.bloco === 'I');
+  const blocoIIData = porSecao.filter(s => s.bloco === 'II');
+  const acertosI  = blocoIData.reduce((a, s) => a + s.acertos, 0);
+  const acertosII = blocoIIData.reduce((a, s) => a + s.acertos, 0);
+  const respondidasTotal = porSecao.reduce((a, s) => a + s.respondidas, 0);
+
+  const pontosI  = acertosI  * CRITERIOS.blocoI.peso;
+  const pontosII = acertosII * CRITERIOS.blocoII.peso;
+  const pontosTotal = +(pontosI + pontosII).toFixed(2);
+
+  const okBlocoI  = acertosI  >= CRITERIOS.blocoI.min;
+  const okBlocoII = acertosII >= CRITERIOS.blocoII.min;
+  const okPontos  = pontosTotal >= CRITERIOS.pontosMinTotal;
+  const aprovado  = okBlocoI && okBlocoII && okPontos;
+
+  // Ranking de prioridade: maior impacto real na nota primeiro (erros × peso da questão)
+  const prioridades = porSecao
+    .filter(s => s.erros > 0)
+    .slice()
+    .sort((a, b) => b.pontosPerdidos - a.pontosPerdidos || a.pct - b.pct);
+
+  return {
+    porSecao, acertosI, acertosII, pontosI, pontosII, pontosTotal,
+    okBlocoI, okBlocoII, okPontos, aprovado, prioridades, respondidasTotal
+  };
+}
+
+function classificarChance(pontosTotal, aprovado) {
+  if (!aprovado) {
+    return {
+      cor: '#b03030',
+      label: '⚠ Risco de eliminação — critério obrigatório não atingido',
+      texto: 'Pelo menos um dos três critérios do Anexo II (mínimo no Bloco I, mínimo no Bloco II ou pontuação total ≥ 70,00) ainda não foi cumprido. Nesse cenário a candidatura seria eliminada antes mesmo de disputar as 5 vagas — esse é o ponto mais urgente a resolver.'
+    };
+  }
+  if (pontosTotal >= 90) {
+    return {
+      cor: '#1a7a4a',
+      label: '🟢 Alta chance de ficar entre as 5 primeiras colocações',
+      texto: 'Nota muito acima do mínimo. Esse patamar costuma figurar entre as melhores colocações em concursos com perfil de questões e concorrência semelhantes.'
+    };
+  }
+  if (pontosTotal >= 80) {
+    return {
+      cor: '#2e7d32',
+      label: '🟡 Chance real, mas ainda depende da concorrência',
+      texto: 'Você está confortavelmente acima do mínimo. Para reduzir a dependência do Cadastro Reserva (CR) e mirar uma das 5 vagas imediatas, vale buscar 90+ pontos.'
+    };
+  }
+  return {
+    cor: '#d4700a',
+    label: '🟠 Aprovado(a), porém posição entre as 5 primeiras é incerta',
+    texto: 'Você cumpre os mínimos exigidos, mas com margem estreita. Pontuações nessa faixa, historicamente, tendem a ficar mais perto do Cadastro Reserva do que das vagas imediatas — ainda há bastante espaço para subir de posição.'
+  };
+}
+
+function renderDiagnostico(dParam) {
+  const d = dParam || calcDiagnostico();
+  const el = document.getElementById('diagnostico');
+  el.classList.add('show');
+  const chance = classificarChance(d.pontosTotal, d.aprovado);
+
+  let h = '';
+
+  if (d.respondidasTotal < TOTAL) {
+    h += `<div class="diag-bloco" style="background:#fffbf0;border-color:#e8d88a;">
+      <p style="font-size:12px;color:#7a5a10;">📌 Diagnóstico parcial — baseado em ${d.respondidasTotal} de ${TOTAL} questões respondidas até agora. Continue o simulado para um diagnóstico final mais preciso.</p>
+    </div>`;
+  }
+
+  h += `<div class="diag-bloco">
+    <h3>📋 Critérios oficiais do Edital (Anexo II)</h3>
+    <div class="diag-criterios">
+      <div class="crit-item ${d.okBlocoI ? 'ok' : 'fail'}">
+        <span class="crit-icone">${d.okBlocoI ? '✓' : '✗'}</span>
+        <span>Bloco I – Conhecimentos Gerais: <strong>${d.acertosI}/30</strong> acertos (mínimo exigido: 12)</span>
+      </div>
+      <div class="crit-item ${d.okBlocoII ? 'ok' : 'fail'}">
+        <span class="crit-icone">${d.okBlocoII ? '✓' : '✗'}</span>
+        <span>Bloco II – Conhecimentos Específicos: <strong>${d.acertosII}/40</strong> acertos (mínimo exigido: 20)</span>
+      </div>
+      <div class="crit-item ${d.okPontos ? 'ok' : 'fail'}">
+        <span class="crit-icone">${d.okPontos ? '✓' : '✗'}</span>
+        <span>Pontuação total ponderada: <strong>${d.pontosTotal.toFixed(2)}/100</strong> (mínimo exigido: 70,00)</span>
+      </div>
+    </div>
+  </div>`;
+
+  h += `<div class="diag-bloco">
+    <h3>🎯 Chance estimada — Técnico Legislativo (5 vagas + Cadastro Reserva)</h3>
+    <div class="chance-card" style="border-color:${chance.cor}">
+      <span class="chance-label" style="color:${chance.cor}">${chance.label}</span>
+      <p>${chance.texto}</p>
+      <p class="diag-disclaimer">⚠ Estimativa baseada apenas na sua nota ponderada oficial (Anexo II). Não há como calcular a posição real entre os 5 primeiros sem os dados dos demais candidatos — trate como referência, não como garantia.</p>
+    </div>
+  </div>`;
+
+  const piores = d.prioridades.slice(0, 6);
+  h += `<div class="diag-bloco">
+    <h3>🧠 Onde estudar para ganhar mais pontos (prioridade inteligente)</h3>
+    <p class="diag-sub">Ordenado pelo impacto real na nota final (erros × peso da questão) — não apenas pela quantidade de erros, já que cada questão do Bloco II vale mais (1,60) do que do Bloco I (1,20).</p>`;
+  if (piores.length === 0) {
+    h += `<p class="diag-zero">🎉 Nenhuma perda de pontos identificada nas questões respondidas até agora!</p>`;
+  } else {
+    h += `<div class="prioridade-lista">`;
+    piores.forEach((s, i) => {
+      h += `<div class="prioridade-item">
+        <div class="prioridade-rank">${i + 1}º</div>
+        <div class="prioridade-info">
+          <div class="prioridade-nome" style="color:${s.cor}">${s.nome}<span class="prioridade-bloco">Bloco ${s.bloco}</span></div>
+          <div class="prioridade-detalhe">${s.acertos}/${s.total} acertos (${Math.round(s.pct)}%) · ${s.erros} erro(s) · peso ${s.peso.toFixed(2)} pts/questão</div>
+        </div>
+        <div class="prioridade-pontos">−${s.pontosPerdidos.toFixed(2)} pts</div>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+  h += `</div>`;
+
+  h += `<div class="diag-bloco">
+    <h3>📊 Desempenho completo por matéria</h3>
+    <div class="materia-tabela">`;
+  d.porSecao.forEach(s => {
+    h += `<div class="materia-linha">
+      <div class="materia-nome" style="color:${s.cor}">${s.nome}</div>
+      <div class="materia-barra-wrap"><div class="materia-barra" style="width:${s.pct}%;background:${s.cor}"></div></div>
+      <div class="materia-num">${s.acertos}/${s.total}</div>
+    </div>`;
+  });
+  h += `</div></div>`;
+
+  el.innerHTML = h;
 }
 
 function mostrarResultado(cert) {
   const el = document.getElementById('resultado');
   el.classList.add('show');
+  const d = calcDiagnostico();
   const nota = document.getElementById('res-nota');
-  nota.textContent = cert + '/50';
-  const pct = Math.round(cert / 50 * 100);
-  if (cert >= 40) {
+  nota.textContent = cert + '/' + TOTAL;
+  const pct = Math.round(cert / TOTAL * 100);
+  if (d.aprovado) {
     nota.className = 'nota aprovado';
-    document.getElementById('res-titulo').textContent = 'Parabéns! Meta atingida ✓';
-    document.getElementById('res-desc').textContent = pct + '% de aproveitamento – acima da meta de 80%.';
+    document.getElementById('res-titulo').textContent = 'Parabéns! Critérios do Edital atingidos ✓';
   } else {
     nota.className = 'nota reprovado';
-    document.getElementById('res-titulo').textContent = 'Continue praticando!';
-    document.getElementById('res-desc').textContent = pct + '% de aproveitamento – abaixo da meta de 80%. Faltaram ' + (40 - cert) + ' acertos.';
+    document.getElementById('res-titulo').textContent = 'Atenção: critério(s) obrigatório(s) não atingido(s)';
   }
+  document.getElementById('res-desc').textContent =
+    pct + '% de aproveitamento geral  ·  Nota oficial ponderada (Anexo II): ' + d.pontosTotal.toFixed(2) + '/100';
+  document.getElementById('res-meta').textContent =
+    'Bloco I: ' + d.acertosI + '/30 (mín. 12)  ·  Bloco II: ' + d.acertosII + '/40 (mín. 20)  ·  Pontuação mín. total: 70,00';
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Para o cronômetro ao finalizar todas as questões
+  if (!provaEncerrada) {
+    provaEncerrada = true;
+    clearInterval(cronoInterval);
+    document.getElementById('btn-pausar').disabled = true;
+    document.getElementById('btn-pausar').textContent = '✓ Concluído';
+  }
+  renderDiagnostico(d);
 }
 
 function renderTabs() {
   const el = document.getElementById('tabs');
-  let h = `<button class="tab ${secaoAtiva === -1 ? 'active' : ''}" onclick="filtrar(-1)">Todas (50)</button>`;
-  secoes.forEach((s, i) => {
+  let h = `<button class="tab ${secaoAtiva === -1 ? 'active' : ''}" onclick="filtrar(-1)">Todas (${TOTAL})</button>`;
+  h += `<span style="padding:6px 4px;font-size:11px;color:#888;align-self:center">Bloco I:</span>`;
+  for (let i = 0; i < 5; i++) {
     const total = questoes.filter(q => q.s === i).length;
-    h += `<button class="tab ${secaoAtiva === i ? 'active' : ''}" onclick="filtrar(${i})">${s.nome} (${total})</button>`;
-  });
+    h += `<button class="tab ${secaoAtiva === i ? 'active' : ''}" onclick="filtrar(${i})">${secoes[i].nome} (${total})</button>`;
+  }
+  h += `<span style="padding:6px 4px;font-size:11px;color:#888;align-self:center">Bloco II:</span>`;
+  for (let i = 5; i < secoes.length; i++) {
+    const total = questoes.filter(q => q.s === i).length;
+    h += `<button class="tab ${secaoAtiva === i ? 'active' : ''}" onclick="filtrar(${i})">${secoes[i].nome} (${total})</button>`;
+  }
   el.innerHTML = h;
 }
 
@@ -252,55 +1056,53 @@ function filtrar(idx) {
 }
 
 function renderQuestoes() {
-  const letras = ['A', 'B', 'C', 'D'];
+  const letras = ['A','B','C','D','E'];
   let html = '';
   questoes.forEach((q, qi) => {
     if (secaoAtiva !== -1 && q.s !== secaoAtiva) return;
     const resp = respostas[qi];
     const respondida = resp !== null;
-    const correta = resp === gabarito[qi];
+    const emBranco = resp === BRANCO;
+    const correta = respondida && resp === q.g;
     const s = secoes[q.s];
-
     html += `<div class="questao" id="q${qi}">`;
     html += `<div class="questao-header">`;
     html += `<span class="questao-num">Questão ${q.n}</span>`;
     html += `<span class="questao-secao" style="color:${s.cor}">${s.nome}</span>`;
     html += `</div>`;
+    if (q.tb) html += `<div class="texto-base">${q.tb}</div>`;
     html += `<div class="questao-enunciado">${q.e}</div>`;
     html += `<div class="opcoes">`;
-
     q.o.forEach((txt, oi) => {
       let cls = 'opcao';
       let disabled = '';
       if (respondida) {
         disabled = 'disabled';
-        if (oi === gabarito[qi]) cls += ' gabarito';
-        if (oi === resp && !correta) cls += ' errada';
+        if (oi === q.g) cls += ' gabarito';
+        if (oi === resp && !correta && !emBranco) cls += ' errada';
         if (oi === resp && correta) cls += ' correta';
       }
       html += `<button class="${cls}" ${disabled} onclick="responder(${qi},${oi})">`;
       html += `<span class="letra">${letras[oi]})</span>${txt}`;
       html += `</button>`;
     });
-
     html += `</div>`;
-
     if (respondida) {
       if (correta) {
         html += `<div class="feedback ok">✓ Correto!</div>`;
+      } else if (emBranco) {
+        html += `<div class="feedback nok">⌀ Não respondida. Resposta correta: ${letras[q.g]}) ${q.o[q.g]}</div>`;
       } else {
-        html += `<div class="feedback nok">✗ Incorreto. Resposta correta: ${letras[gabarito[qi]]}) ${q.o[gabarito[qi]]}</div>`;
+        html += `<div class="feedback nok">✗ Incorreto. Resposta correta: ${letras[q.g]}) ${q.o[q.g]}</div>`;
       }
     }
-
     html += `</div>`;
   });
-
   document.getElementById('questoes').innerHTML = html;
 }
 
 function responder(qi, oi) {
-  if (respostas[qi] !== null) return;
+  if (respostas[qi] !== null || provaEncerrada) return;
   respostas[qi] = oi;
   atualizarStats();
   renderQuestoes();
@@ -311,27 +1113,36 @@ function responder(qi, oi) {
 }
 
 function reiniciar() {
-  respostas = new Array(50).fill(null);
+  if (!confirm('Reiniciar o simulado? O cronômetro voltará a 4h.')) return;
+  respostas = new Array(TOTAL).fill(null);
   secaoAtiva = -1;
+  tempoRestante = DURACAO;
+  provaEncerrada = false;
+  pausado = false;
+  clearInterval(cronoInterval);
   document.getElementById('resultado').classList.remove('show');
+  document.getElementById('diagnostico').classList.remove('show');
+  document.getElementById('diagnostico').innerHTML = '';
+  document.getElementById('btn-pausar').disabled = false;
+  document.getElementById('btn-pausar').textContent = '⏸ Pausar';
+  document.getElementById('btn-pausar').classList.remove('pausado');
+  document.getElementById('pause-overlay').classList.remove('show');
   atualizarStats();
   renderTabs();
   renderQuestoes();
+  iniciarCronometro();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function revelarGabarito() {
   if (!confirm('Isso vai revelar todas as respostas. Tem certeza?')) return;
-  questoes.forEach((q, qi) => {
-    if (respostas[qi] === null) respostas[qi] = gabarito[qi];
-  });
+  // Questões em branco contam como erro (não como acerto automático)
+  questoes.forEach((q, qi) => { if (respostas[qi] === null) respostas[qi] = BRANCO; });
+  if (!provaEncerrada) { provaEncerrada = true; clearInterval(cronoInterval); }
   atualizarStats();
   renderQuestoes();
+  mostrarResultado(calcStats().cert);
 }
-
-// Init
-renderTabs();
-renderQuestoes();
 </script>
 </body>
 </html>
